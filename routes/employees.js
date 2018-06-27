@@ -7,6 +7,7 @@ const util = require('../common/util');
 
 router.get('/:currentPage/:pageSize/:sortField/:sortDir/:filterText*?', 
   function (req, res, next) {
+    // debugger
     let response = {
       employees: util.getEmployeesData(req.params),
       pageCount: util.pageCount,

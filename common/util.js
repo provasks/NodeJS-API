@@ -1,13 +1,14 @@
 const faker = require('faker/locale/en_IND');
 
 const config = {
-    total: 1000,
+    total: 100,
     sortField: 'id',
-    sortDir: 1
+    sortDir: 1,
+    filterCols: ["id", "firstName", "lastName"]
 }
 
 const util = {
-    employees: (function () {
+    employees: (function (config) {
         // console.log('Total: ' + total)
         const emps = [];
         for (let index = 0; index < config.total; index++) {
@@ -27,13 +28,13 @@ const util = {
             emps.push(emp);
         }
         return emps;
-    }()),
+    }(config)),
     pageCount: 1,
     recordCount: 0,
     getEmployeesData(params) {
         let filterText = params.filterText ? params.filterText.trim() : "";
         let filteredEmployees = filterText ?
-            this.filter(this.employees, params.filterText ? params.filterText.trim() : "") :
+            this.filter(this.employees, params.filterText ? params.filterText.trim() : "", config.filterCols) :
             this.employees;
 
         let filteredAndSortedEmployees = this.sort(filteredEmployees, params.sortField || config.sortField, params.sortDir || config.sortDir);
@@ -45,11 +46,14 @@ const util = {
         // return filteredAndSortedEmployees;
         return filteredAndSortedEmployees.slice((currentPage - 1) * pageSize, currentPage * pageSize);
     },
-    filter(collection = [], text = "") {
-        return collection.filter(item =>
-            item.id.toString().toLowerCase().indexOf(text.toLowerCase()) > -1 ||
-            item.firstName.toLowerCase().indexOf(text.toLowerCase()) > -1 ||
-            item.lastName.toLowerCase().indexOf(text.toLowerCase()) > -1);
+    filter(collection = [], text = "", filterCols = []) {
+        return collection.filter(item => 
+            filterCols.some(col => item[col].toString().toLowerCase().indexOf(text.toLowerCase()) > -1)
+            // item.id.toString().toLowerCase().indexOf(text.toLowerCase()) > -1 ||
+            // item.firstName.toLowerCase().indexOf(text.toLowerCase()) > -1 ||
+            // item.lastName.toLowerCase().indexOf(text.toLowerCase()) > -1
+        
+        );
     },
     sort(collection = [], field = config.sortField, direction = config.sortDir) {
         return collection.sort(function (a, b) {
